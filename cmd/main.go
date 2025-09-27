@@ -11,12 +11,22 @@ import (
 	"schedulr/internal/service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found")
+	}
+
 	r := gin.Default()
 
 	db, err := config.InitDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = db.Migrator().DropTable(&models.User{})
 	if err != nil {
 		log.Fatal(err)
 	}

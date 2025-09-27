@@ -2,8 +2,10 @@ package service
 
 import (
 	"errors"
+	"schedulr/internal/dto"
 	"schedulr/internal/models"
 	"schedulr/internal/repository"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -11,20 +13,28 @@ type AuthService struct {
 	Repo *repository.UserRepository
 }
 
-func (s *AuthService) Register(user *models.User) error {
-	existing, _ := s.Repo.GetUserByEmail(user.Email)
+func (s *AuthService) Register(input *dto.RegisterInput) (*models.User, error) {
+	existing, _ := s.Repo.GetUserByEmail(input.Email)
 	if existing.ID != 0 {
-		return errors.New("email already resgitered")
+		return nil, errors.New("email already resgitered")
 	}
 
-	hashed, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashed, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	user.Password = string(hashed)
+	user := &models.User{
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: string(hashed),
+	}
 
-	return s.Repo.CreateUser(user)
+	if err := s.Repo.CreateUser(user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (s *AuthService) Login(email, password string) (*models.User, error) {

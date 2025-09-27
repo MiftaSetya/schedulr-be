@@ -2,7 +2,7 @@ package handler
 
 import (
 	"net/http"
-	"schedulr/internal/models"
+	"schedulr/internal/dto"
 	"schedulr/internal/service"
 	"time"
 
@@ -16,25 +16,26 @@ type AuthHandler struct {
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
-	var input models.User
+	var input *dto.RegisterInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.Service.Register(&input); err != nil {
+	user, err := h.Service.Register(input)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "user registered"})
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "user registered",
+		"user":    dto.ToUserResponse(user),
+	})
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
-	var input struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var input dto.LoginInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -57,12 +58,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"user": gin.H{
-			"id":    user.ID,
-			"name":  user.Name,
-			"email": user.Email,
-		},
-		"token": tokenString,
+	c.JSON(http.StatusOK, dto.LoginResponse{
+		User:  dto.ToUserResponse(user),
+		Token: tokenString,
 	})
 }
