@@ -26,11 +26,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = db.Migrator().DropTable(&models.User{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	db.AutoMigrate(&models.User{})
 
 	jwtSecret := os.Getenv("JWT_SECRET")
@@ -38,10 +33,12 @@ func main() {
 	userRepo := &repository.UserRepository{DB: db}
 	authService := &service.AuthService{Repo: userRepo}
 	authHandler := &handler.AuthHandler{Service: authService, JwtSecret: jwtSecret}
+	profileHandler := &handler.ProfileHandler{UserRepo: userRepo}
 
 	api := r.Group("/api")
 	{
 		routes.AuthRoutes(api, authHandler)
+		routes.ProfileRoutes(api, profileHandler)
 	}
 
 	r.Run(":8080")
