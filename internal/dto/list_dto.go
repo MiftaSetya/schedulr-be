@@ -13,3 +13,12 @@ type ListResponse struct {
 	Position int            `json:"position"`
 	Tasks    []TaskResponse `json:"tasks,omitempty"`
 }
+
+type UpdateListPositionInput struct {
+	ID       uint `json:"id" binding:"required"`
+	Position int  `json:"position" binding:"required"`
+}
+
+type UpdateListsOrderInput struct {
+	Lists []UpdateListPositionInput `json:"lists" binding:"required,dive"`
+}

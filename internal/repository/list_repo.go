@@ -36,6 +36,19 @@ func (r *ListRepository) UpdateListPosition(listID uint, newPos int) error {
         Update("position", newPos).Error
 }
 
+func (r *ListRepository) UpdateListsOrder(lists []models.List) error {
+	tx := r.DB.Begin()
+	for _, list := range lists {
+		if err := tx.Model(&models.List{}).
+			Where("id = ?", list.ID).
+			Update("position", list.Position).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	return tx.Commit().Error
+}
+
 func (r *ListRepository) DeleteList(id uint) error {
 	return r.DB.Delete(&models.List{}, id).Error
 }

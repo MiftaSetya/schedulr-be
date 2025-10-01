@@ -44,29 +44,23 @@ func (s *ListService) UpdateListName(id uint, input *dto.CreateListInput) (*mode
 	return list, nil
 }
 
-func (s *ListService) UpdateListPosition(id uint, newPosition int) (*models.List, error) {
-	list, err := s.Repo.GetListById(id)
-	if err != nil {
-		return nil, err
-	}
-
-	list.Position = newPosition
-
-	if err := s.Repo.UpdateList(list); err != nil {
-		return nil, err
-	}
-
-	return list, nil
+func (s *ListService) UpdateListPosition(input *dto.UpdateListPositionInput) error {
+	return s.Repo.UpdateListPosition(input.ID, input.Position)
 }
 
-func (s *ListService) UpdateListOrder(lists []*models.List) error {
-	for _, list := range lists {
-		if err := s.Repo.UpdateList(list); err != nil {
-			return err
+func (s *ListService) UpdateListsOrder(input *dto.UpdateListsOrderInput) error {
+	var lists []models.List
+	for _, l := range input.Lists {
+		list := models.List{
+			Position: l.Position,
 		}
+		list.ID = l.ID 
+
+		lists = append(lists, list)
 	}
-	return nil
+	return s.Repo.UpdateListsOrder(lists)
 }
+
 
 func (s *ListService) DeleteList(id uint) error {
 	return s.Repo.DeleteList(id)
