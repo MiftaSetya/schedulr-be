@@ -2,7 +2,7 @@ package dto
 
 type CreateBoardInput struct {
 	Name    string `json:"name" binding:"required"`
-	OwnerID uint   `json:"owner_id" binding:"required"`
+	OwnerID uint   `json:"-"`
 }
 
 type BoardResponse struct {

@@ -2,7 +2,7 @@ package routes
 
 import (
 	"schedulr/internal/api/handler"
-	"schedulr/internal/middleware"
+	"schedulr/internal/api/middleware"
 
 	"github.com/gin-gonic/gin"
 )
